@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
 
             <div style="text-align: left;">
                 <h3>🛠️ How to Add a School (POST)</h3>
-                <p>To add a new school to the database, send a <strong>POST</strong> request to <code>/addSchool</code> using Postman with this JSON body:</p>
+                <p>To add a new school to the database, send a <strong>POST</strong> request to <code>/addSchool</code> using Postman with this JSON body like this :</p>
                 <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; overflow-x: auto;">
 {
   "name": "Sinhgad College of Engineering",
