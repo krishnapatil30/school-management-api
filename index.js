@@ -10,7 +10,12 @@ const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    database: process.env.DB_NAME || 'school-db',
+    port: process.env.DB_PORT || 4000,
+    ssl: {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true
+    }
 }).promise();
 
 // --- API 1: Add School ---
@@ -60,4 +65,5 @@ app.get('/listSchools', async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log("🚀 Server running on http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
