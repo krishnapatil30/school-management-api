@@ -6,12 +6,11 @@ const app = express();
 app.use(express.json());
 
 // Database Connection
-// Database Connection
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME || 'test', // <--- Update this line right here
+    database: process.env.DB_NAME || 'test',
     port: process.env.DB_PORT || 4000,
     ssl: {
         minVersion: 'TLSv1.2',
@@ -19,12 +18,42 @@ const db = mysql.createPool({
     }
 }).promise();
 
+// --- Home Route with Interactive UI & Instructions ---
+app.get('/', (req, res) => { 
+    res.send(`
+        <div style="font-family: sans-serif; max-width: 800px; margin: auto; padding: 50px; line-height: 1.6; text-align: center;">
+            <h1 style="color: #2c3e50;">🏫 School Management API</h1>
+            <p>The API is officially live and connected to <strong>TiDB Cloud!</strong></p>
+            
+            <div style="margin: 30px 0;">
+                <a href="/listSchools?latitude=18.52&longitude=73.85" 
+                   style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                   🚀 View Nearby Schools (Test GET)
+                </a>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 40px 0;">
+
+            <div style="text-align: left;">
+                <h3>🛠️ How to Add a School (POST)</h3>
+                <p>To add a new school to the database, send a <strong>POST</strong> request to <code>/addSchool</code> using Postman with this JSON body:</p>
+                <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd; overflow-x: auto;">
+{
+  "name": "Sinhgad College of Engineering",
+  "address": "Vadgaon Budruk, Pune",
+  "latitude": 18.4636,
+  "longitude": 73.8340
+}
+                </pre>
+            </div>
+        </div>
+    `);
+});
+
 // --- API 1: Add School ---
-// --- API 1: Add School (Enhanced Validation) ---
 app.post('/addSchool', async (req, res) => {
     const { name, address, latitude, longitude } = req.body;
 
-    // Data type and range validation
     if (!name || !address || typeof latitude !== 'number' || typeof longitude !== 'number') {
         return res.status(400).json({ error: "Invalid or missing required fields" });
     }
@@ -57,7 +86,6 @@ app.get('/listSchools', async (req, res) => {
     try {
         const [schools] = await db.execute("SELECT * FROM schools");
 
-        // Simple Distance Calculation (Pythagorean)
         const sortedSchools = schools.map(school => {
             const distance = Math.sqrt(
                 Math.pow(school.latitude - userLat, 2) + 
