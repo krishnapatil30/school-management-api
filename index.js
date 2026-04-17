@@ -6,11 +6,12 @@ const app = express();
 app.use(express.json());
 
 // Database Connection
+// Database Connection
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME || 'school-db',
+    database: process.env.DB_NAME || 'test', // <--- Update this line right here
     port: process.env.DB_PORT || 4000,
     ssl: {
         minVersion: 'TLSv1.2',
@@ -19,11 +20,17 @@ const db = mysql.createPool({
 }).promise();
 
 // --- API 1: Add School ---
+// --- API 1: Add School (Enhanced Validation) ---
 app.post('/addSchool', async (req, res) => {
     const { name, address, latitude, longitude } = req.body;
 
-    if (!name || !address || latitude === undefined || longitude === undefined) {
-        return res.status(400).json({ error: "Missing required fields" });
+    // Data type and range validation
+    if (!name || !address || typeof latitude !== 'number' || typeof longitude !== 'number') {
+        return res.status(400).json({ error: "Invalid or missing required fields" });
+    }
+
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+        return res.status(400).json({ error: "Latitude or Longitude out of range" });
     }
 
     try {
@@ -31,9 +38,9 @@ app.post('/addSchool', async (req, res) => {
             "INSERT INTO schools (name, address, latitude, longitude) VALUES (?, ?, ?, ?)",
             [name, address, latitude, longitude]
         );
-        res.status(201).json({ message: "School added!", id: result.insertId });
+        res.status(201).json({ message: "School added successfully!", id: result.insertId });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: "Database error: " + err.message });
     }
 });
 
